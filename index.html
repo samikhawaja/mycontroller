@@ -221,8 +221,9 @@ function nextStep() {
 
 function mycurl(theUrl) {
 	valEle = document.getElementById('customip');
-	theUrl = theUrl.replace("hexapod.fritz.box", valEle.value);
-	alert(theUrl);	
+	if (valEle.value != "") {
+		theUrl = theUrl.replace("hexapod.fritz.box", valEle.value);
+	}
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
 	xmlHttp.send( null );
