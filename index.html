@@ -35,6 +35,8 @@
 <a href="http://hexapod.fritz.box?configure=0&leg_up_delay=125&leg_lift_z=40&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=150&default_x=35&default_y=0&default_z=70">stable</a>
 <a href="http://hexapod.fritz.box?configure=0&leg_up_delay=100&leg_lift_z=60&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=100&default_x=50&default_y=0&default_z=70">stable fast</a>
 <a href="http://hexapod.fritz.box?configure=0&leg_up_delay=100&leg_lift_z=60&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=500&default_x=50&default_y=0&default_z=70">stable slower</a>
+
+<input type="text" value="" id="customip" />
 <script>
 
 var moving = false;
@@ -218,6 +220,9 @@ function nextStep() {
 }
 
 function mycurl(theUrl) {
+	valEle = document.getElementById('customip');
+	theUrl = theUrl.replace("hexapod.fritz.box", valEle.value);
+	alert(theUrl);	
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
 	xmlHttp.send( null );
@@ -227,4 +232,3 @@ function mycurl(theUrl) {
 </script>
 </body>
 </html>
-
