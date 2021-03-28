@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Move robot</h1>
+<button id="up" onclick='mycurl("http://hexapod.fritz.box?X=50&Y=0&Z=90");'>up</button>
+<button id="down" onclick='mycurl("http://hexapod.fritz.box?X=50&Y=0&Z=50");'>down</button>
+<button id="stop" onclick="stopForward()">stop</button>
+<text id="answer">asdfa</text>
+<br/>
+<br/>
+<table>
+<tr>
+<td></td><td><button id="forward" onmousedown="goForwardDown()" onmouseup="stopEventUp()">forward</button></td><td></td>
+</tr>
+<tr>
+<td><button id="left" onmousedown="goTurnLeftDown()" onmouseup="stopEventUp()">left</button></td><td></td><td><button id="right" onmousedown="goTurnRightDown()" onmouseup="stopEventUp()">right</button></td>
+</tr>
+<tr>
+<td></td><td><button id="backward" onmousedown="goBackwardDown()" onmouseup="stopEventUp()">backward</button></td><td></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+<h2>walkmode</h2>
+<input type="radio" id="creep" name="walkmode" value="0" onclick="handleWalkMode(this)">
+<label for="creep">Creep</label><br>
+<input type="radio" id="trot" name="walkmode" value="1" onclick="handleWalkMode(this)">
+<label for="trot">Trot</label><br>
+<br/>
+<br/>
+<br/>
+<h2> configurations </h2>
+<a href="http://hexapod.fritz.box?configure=0&leg_up_delay=125&leg_lift_z=40&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=150&default_x=35&default_y=0&default_z=70">stable</a>
+<a href="http://hexapod.fritz.box?configure=0&leg_up_delay=100&leg_lift_z=60&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=100&default_x=50&default_y=0&default_z=70">stable fast</a>
+<a href="http://hexapod.fritz.box?configure=0&leg_up_delay=100&leg_lift_z=60&leg_forward_y=40&leg_forward_x=0&leg_spread_y=20&step_delay=500&default_x=50&default_y=0&default_z=70">stable slower</a>
+<script>
+
+var moving = false;
+var turning = false;
+var direction = 0;
+var towards = 0;
+
+function handleWalkMode(walkmodeRadio) {
+//	alert();
+	mycurl("http://192.168.178.30/control?walkmode=" + walkmodeRadio.value);
+}
+
+function goForwardDown() {
+	if (moving) {
+  		if (direction == 1) {
+	    		moving = false;
+	    		stopForward();
+	    		valEle.innerHTML = "down stopped: ";
+    		}
+    	} else {
+   	        moving = true;   
+   	        direction = 0;
+		setTimeout(goForward, 1);
+		valEle.innerHTML = "down done: ";
+    	}
+}
+
+function goTurnLeftDown() {
+	if (turning) {
+  		if (towards == 1) {
+	    		turning = false;
+	    		stopForward();
+	    		valEle.innerHTML = "down stopped: ";
+    		}
+    	} else {
+   	        turning = true;   
+   	        towards = 0;
+		setTimeout(goTurn, 1);
+		valEle.innerHTML = "turn down done: ";
+    	}
+}
+
+function goTurnRightDown() {
+	if (turning) {
+  		if (towards == 0) {
+	    		turning = false;
+	    		stopForward();
+	    		valEle.innerHTML = "down stopped: ";
+    		}
+    	} else {
+   	        turning = true;   
+   	        towards = 1;
+		setTimeout(goTurn, 1);
+		valEle.innerHTML = "turn down done: ";
+    	}
+}
+
+function goBackwardDown() {
+	if (moving) {
+		if (direction == 0) {
+	    		moving = false;
+	    		stopForward();
+	    		valEle.innerHTML = "down stopped: ";
+    		}		
+    	} else {
+	    	moving = true;
+   	        direction = 1;
+	    	setTimeout(goBackward, 1);    	              
+		valEle.innerHTML = "down done: ";
+    	}
+}
+
+function stopEventUp() {
+	if (moving || turning) {
+    		moving = false;
+    		turning = false;
+    		setTimeout(stopForward, 1);
+
+    	}
+}
+
+document.addEventListener('keydown', function(event) {
+//    alert(event.keyCode);
+    valEle = document.getElementById('answer');
+    valEle.innerHTML = "down: " + event.keyCode;
+    if(event.keyCode == 37) {
+	goTurnLeftDown();        
+    }
+    else if(event.keyCode == 39) {
+	goTurnRightDown();
+    }
+    else if(event.keyCode == 38) {
+  	goForwardDown();
+    }
+    else if(event.keyCode == 40) {
+	goBackwardDown();
+    }    
+});
+
+document.addEventListener('keyup', function(event) {
+//    alert(event.keyCode);
+    valEle = document.getElementById('answer');
+    valEle.innerHTML = "up: " + event.keyCode;
+    if(event.keyCode == 37) {
+        stopEventUp();
+    }
+    else if(event.keyCode == 39) {
+        stopEventUp();
+    }
+    else if(event.keyCode == 38) {
+    	stopEventUp();
+    }
+    else if(event.keyCode == 40) {
+    	stopEventUp();
+    }
+    
+    valEle.innerHTML = "up done: " + event.keyCode;
+});
+
+var mytimeout;
+var value = 0;
+function handleTimer() {
+//	alert("hello");
+	//clearInterval(mytimeout);
+	nextStep();
+	valEle = document.getElementById('answer');
+	valEle.innerHTML = value;
+	++value;
+	//mytimeout = setInterval(handleTimer, 1000);
+}
+
+function goForward() {
+//	
+	valEle = document.getElementById('answer');
+	valEle.innerHTML = "done";
+	//mytimeout = setInterval(handleTimer, 2000);
+	mycurl("http://hexapod.fritz.box/control?move=0");
+}
+
+function goTurn() {
+//	
+	valEle = document.getElementById('answer');
+	valEle.innerHTML = "done";
+	//mytimeout = setInterval(handleTimer, 2000);
+	mycurl("http://hexapod.fritz.box/control?turn=" + towards);
+}
+
+function goBackward() {
+//	
+	valEle = document.getElementById('answer');
+	valEle.innerHTML = "done";
+	//mytimeout = setInterval(handleTimer, 2000);
+	mycurl("http://hexapod.fritz.box/control?move=1");
+}
+
+function stopForward() {
+	//clearInterval(mytimeout);
+	mycurl("http://hexapod.fritz.box/control?stop=0");
+}
+/*function sendXY(context, oldx, oldy, x1, y1) {
+	if (Math.abs(oldx - x1) < 40
+		&& Math.abs(oldy - y1) < 40) {
+		return false;
+	}
+	
+	valEle = document.getElementById('Value');
+	valEle.innerHTML = Math.round(x1/4);
+	
+	//drawLine(context, oldx, oldy, x1, y1);
+	theUrl = "http://mycar?angle1="+Math.round(y1/4)+"&angle2="+(180-Math.round(x1/4));
+//	alert(theUrl);
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+	xmlHttp.send( null );
+	valEle.innerHTML = xmlHttp.responseText;
+}
+*/
+
+function nextStep() {
+	mycurl("http://hexapod.fritz.box?next=0");
+}
+
+function mycurl(theUrl) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
+	xmlHttp.send( null );
+}
+
+
+</script>
+</body>
+</html>
+
